@@ -39,7 +39,7 @@ class SocketError(BeanstalkcException):
     def wrap(wrapped_function, *args, **kwargs):
         try:
             return wrapped_function(*args, **kwargs)
-        except socket.error, err:
+        except socket.error as err:
             raise SocketError(err)
 
 
@@ -128,7 +128,7 @@ class Connection(object):
     def _interact_peek(self, command):
         try:
             return self._interact_job(command, ['FOUND'], ['NOT_FOUND'], False)
-        except CommandFailed, (_, _status, _results):
+        except CommandFailed:
             return None
 
     # -- public interface --
@@ -153,7 +153,8 @@ class Connection(object):
             return self._interact_job(command,
                                       ['RESERVED'],
                                       ['DEADLINE_SOON', 'TIMED_OUT'])
-        except CommandFailed, (_, status, results):
+        except CommandFailed as exc:
+            _, status, results = exc.args
             if status == 'TIMED_OUT':
                 return None
             elif status == 'DEADLINE_SOON':
